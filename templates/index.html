@@ -14,11 +14,18 @@
       <button id="attestBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Attest Environment</button>
     </div>
 
-    <div id="attestStatus" class="mb-4 hidden text-green-600 flex items-center gap-2">
+    <div id="attestStatusPassed" class="mb-4 hidden text-green-600 flex items-center gap-2">
       <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
       </svg>
-      <span>Environment Attested Securely</span>
+      <span>Environment Verified Successfully. Your data is being processed in a secure Environment.</span>
+    </div>
+
+    <div id="attestStatusFailed" class="mb-4 hidden text-red-600 flex items-center gap-2">
+      <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+      <span>Verification failed. VM environment is not secured.</span>
     </div>
 
     <div id="chatWindow" class="border border-gray-300 rounded-md p-4 h-64 overflow-y-scroll bg-gray-50 mb-4"></div>
@@ -32,7 +39,8 @@
   <script>
     const chatWindow = document.getElementById("chatWindow");
     const attestBtn = document.getElementById("attestBtn");
-    const attestStatus = document.getElementById("attestStatus");
+    const attestStatusPassed = document.getElementById("attestStatusPassed");
+    const attestStatusFailed = document.getElementById("attestStatusFailed");
     const sendBtn = document.getElementById("sendBtn");
     const userInput = document.getElementById("userInput");
 
@@ -42,12 +50,24 @@
       attestBtn.innerText = "Attesting...";
       try {
         const res = await axios.get("/attest");
-        if (res.data.attestation_report_base64) {
-          attestStatus.classList.remove("hidden");
-          attestBtn.innerText = "Attested";
-          attestBtn.classList.add("bg-green-600");
-        }
-      } catch (err) {
+        if (res.data.verification_result === "not verified") {
+        attestStatusFailed.classList.remove("hidden");
+        attestStatusFailed.classList.remove("text-green-600");
+        attestStatusFailed.classList.add("text-red-600");
+        attestBtn.innerText = "Attest Environment";
+        attestBtn.disabled = false;
+        sendBtn.disabled = true;
+        userInput.disabled = true;
+      } else if (res.data.attestation_report_base64) {
+        attestStatusPassed.classList.remove("hidden");
+        attestStatusPassed.classList.remove("text-red-600");
+        attestStatusPassed.classList.add("text-green-600");
+        attestBtn.innerText = "Attested";
+        attestBtn.classList.add("bg-green-600");
+        sendBtn.disabled = false;
+        userInput.disabled = false;
+      }
+    } catch (err) {
         alert("Attestation failed");
         attestBtn.disabled = false;
         attestBtn.innerText = "Attest Environment";

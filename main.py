@@ -51,7 +51,7 @@ async def attest():
         # Verify the attestation report
         print(f"Verifying attestation report at {report_path}")
         verification_result = att.verify_report()
-
+        print("Verification Result - ", verification_result)
         return {
             "attestation_report_base64": report_b64,
             "verification_result": verification_result

@@ -112,8 +112,22 @@ class Attestation:
             self.device_certs_dir,
             report_path
         ], capture_output=True, text=True)
-        if result.returncode != 0:
+        
+        output = result.stdout.strip() + "\n" + result.stderr.strip()
+        print(output)
+        if result.returncode == 0 and all(
+            phrase in output for phrase in [
+                "Reported TCB Boot Loader from certificate matches the attestation report.",
+                "Reported TCB TEE from certificate matches the attestation report.",
+                "Reported TCB SNP from certificate matches the attestation report.",
+                "Reported TCB Microcode from certificate matches the attestation report.",
+                "VEK signed the Attestation Report!"
+            ]
+        ):
+            return "verified"
+        elif result.returncode == 0:
+            return "not verified"
+        else:
             raise RuntimeError(f"Attestation report verification failed: {result.stdout} {result.stderr}")
-        print(result.stdout.strip())
-        return result.stdout.strip()
+        
     
