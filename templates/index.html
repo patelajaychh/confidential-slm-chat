@@ -44,6 +44,10 @@
     const sendBtn = document.getElementById("sendBtn");
     const userInput = document.getElementById("userInput");
 
+    // On page load, disable chat until attestation
+    sendBtn.disabled = true;
+    userInput.disabled = true;
+
     // Perform attestation
     attestBtn.onclick = async () => {
       attestBtn.disabled = true;
@@ -98,7 +102,20 @@
         chatWindow.appendChild(botBubble);
         chatWindow.scrollTop = chatWindow.scrollHeight;
       } catch (err) {
-        alert("Error: " + err.message);
+        if (
+          (err.response && err.response.status === 403) ||
+          (err.response && err.response.data && err.response.data.error === "Environment not attested. Please attest environment first.")
+        ) {
+          alert("Environment not attested. Please click 'Attest Environment' before chatting.");
+          sendBtn.disabled = true;
+          userInput.disabled = true;
+          attestBtn.disabled = false;
+          attestBtn.innerText = "Attest Environment";
+          attestStatusPassed.classList.add("hidden");
+          attestStatusFailed.classList.remove("hidden");
+        } else {
+          alert("Error: " + (err.response?.data?.error || err.message));
+        }
       }
     };
 
