@@ -43,7 +43,11 @@ pip install -r requirements.txt
 ### 5. Run the Application
 
 ```bash
+# Run in production mode
 ./run.sh
+
+# Run in debug mode
+./run.sh --debug
 ```
 
 The app will be available at [http://localhost:8000](http://localhost:8000).
