@@ -1,3 +1,8 @@
+"""
+# Usage 
+python3 benchmark_models.py
+"""
+
 import time
 import psutil
 import torch
@@ -57,7 +62,7 @@ def benchmark_model(model_name):
         tokens_per_sec = tokens_generated / time_taken if time_taken > 0 else 0
         print(f"Output: {gen_text}")
         print(f"Time taken: {time_taken:.4f} seconds")
-        print(f"Memory used: {memory_used:.2f} MB")
+        print(f"Memory used: {memory_used:.3f} MB")
         print(f"Tokens generated: {tokens_generated}")
         print(f"Throughput: {tokens_per_sec:.2f} tokens/sec")
         results.append({
