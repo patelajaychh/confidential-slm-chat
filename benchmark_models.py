@@ -15,7 +15,18 @@ import numpy as np
 import pandas as pd
 import psutil
 import torch
+import warnings
 from transformers import AutoModelForCausalLM, AutoTokenizer
+
+# Suppress transformers warnings
+warnings.filterwarnings("ignore", message=".*pad_token_id.*")
+# Also suppress the specific transformers logging
+import logging
+logging.getLogger("transformers.generation_utils").setLevel(logging.ERROR)
+logging.getLogger("transformers").setLevel(logging.ERROR)
+
+# Set environment variable to suppress transformers warnings
+os.environ["TRANSFORMERS_VERBOSITY"] = "error"
 
 # ---------------- CONFIG ----------------
 MODELS = [
@@ -49,6 +60,9 @@ def collect_perf_metrics(duration=10):
 
 def benchmark_model(model_name, token_length, batch_size, concurrency):
     tokenizer = AutoTokenizer.from_pretrained(model_name)
+    # Set pad_token to eos_token to avoid warnings
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
     model = AutoModelForCausalLM.from_pretrained(model_name).to(DEVICE)
     prompt = "India was known as Golden Bird before"  
     inputs = tokenizer([prompt] * batch_size, return_tensors="pt").to(DEVICE)
